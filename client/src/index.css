@@ -1,0 +1,87 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-navy: #0c1929;
+  --color-navy-mid: #152238;
+  --color-navy-soft: #1e3354;
+  --color-primary: #0c1929;
+  --color-primary-dark: #060f18;
+  --color-accent: #c9a962;
+  --color-accent-muted: #e8dcc4;
+  --color-secondary: #152238;
+  --color-foreground: #0f1419;
+  --color-muted: #5c6670;
+  --color-muted-light: #94a3b8;
+  --color-border: #e8ecf1;
+  --color-border-subtle: #f1f4f8;
+  --color-success: #0d7a5f;
+  --color-warning: #b45309;
+  --color-danger: #b91c1c;
+  --color-background: #fafbfc;
+  --color-surface: #ffffff;
+  --color-card: #ffffff;
+  --radius-card: 16px;
+  --radius-button: 10px;
+  --radius-input: 10px;
+  --shadow-soft: 0 1px 2px rgb(12 25 41 / 0.04);
+  --shadow-card: 0 4px 24px rgb(12 25 41 / 0.06);
+  --shadow-elevated: 0 24px 64px rgb(12 25 41 / 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.011em;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgb(12 25 41 / 0.12);
+}
+
+.section-pad {
+  padding-top: clamp(5rem, 10vw, 8rem);
+  padding-bottom: clamp(5rem, 10vw, 8rem);
+}
+
+.container-marketing {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 2rem);
+}
+
+.heading-display {
+  font-size: clamp(2.5rem, 5.5vw, 4.25rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.heading-section {
+  font-size: clamp(1.875rem, 3.5vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.text-balance {
+  text-wrap: balance;
+}

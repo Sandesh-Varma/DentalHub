@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Login roles: PATIENT (portal), DOCTOR + RECEPTIONIST (practice dashboard).
+enum Role {
+  PATIENT
+  DOCTOR
+  RECEPTIONIST
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password      String?
+  googleId      String?  @unique @map("google_id")
+  role          Role
+  phone         String?
+  isActive      Boolean  @default(true)
+  /// Solo clinic owner (DOCTOR only) — can manage team and growth.
+  isClinicOwner Boolean  @default(false) @map("is_clinic_owner")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  doctor              Doctor?
+  patient             Patient?
+  notifications       Notification[]
+  appointmentsBooked  Appointment[] @relation("BookedByUser")
+  passwordResetOtps   PasswordResetOtp[]
+
+  @@map("users")
+}
+
+model PasswordResetOtp {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  codeHash  String    @map("code_hash")
+  expiresAt DateTime  @map("expires_at")
+  attempts  Int       @default(0)
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_otps")
+}
+
+/// Clinical profile for users with role DOCTOR.
+model Doctor {
+  id             String   @id @default(uuid())
+  userId         String   @unique @map("user_id")
+  specialization String
+  qualification  String?
+  experience     Int?
+  bio            String?
+  clinicName     String?  @map("clinic_name")
+  address        String?
+  profileImage   String?  @map("profile_image")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedules         Schedule[]
+  unavailability    DoctorUnavailability[]
+  appointments      Appointment[]
+
+  @@map("doctors")
+}
+
+model Patient {
+  id               String   @id @default(uuid())
+  userId           String   @unique @map("user_id")
+  dob              DateTime?
+  gender           Gender?
+  address          String?
+  emergencyContact String?  @map("emergency_contact")
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments     Appointment[]
+
+  @@map("patients")
+}
+
+model Schedule {
+  id           String    @id @default(uuid())
+  doctorId     String    @map("doctor_id")
+  dayOfWeek    DayOfWeek @map("day_of_week")
+  startTime    String    @map("start_time")
+  endTime      String    @map("end_time")
+  slotDuration Int       @default(30) @map("slot_duration")
+  doctor       Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, dayOfWeek])
+  @@map("schedules")
+}
+
+/// Blocked dates/times — everything else follows regular Schedule hours.
+model DoctorUnavailability {
+  id        String   @id @default(uuid())
+  doctorId  String   @map("doctor_id")
+  date      DateTime @map("date") @db.Date
+  startTime String?  @map("start_time")
+  endTime   String?  @map("end_time")
+  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId, date])
+  @@map("doctor_unavailability")
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  patientId       String            @map("patient_id")
+  doctorId        String            @map("doctor_id")
+  appointmentDate DateTime          @map("appointment_date")
+  startTime       String            @map("start_time")
+  endTime         String            @map("end_time")
+  reason          String?
+  status          AppointmentStatus @default(PENDING)
+  bookedByUserId  String?           @map("booked_by_user_id")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  patient         Patient           @relation(fields: [patientId], references: [id])
+  doctor          Doctor            @relation(fields: [doctorId], references: [id])
+  bookedBy        User?             @relation("BookedByUser", fields: [bookedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([doctorId, appointmentDate, startTime])
+  @@map("appointments")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  title     String
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}

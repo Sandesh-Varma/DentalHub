@@ -1,0 +1,13 @@
+export { HeroSection } from "./HeroSection";
+export { TrustSection } from "./TrustSection";
+export { ServicesSection } from "./ServicesSection";
+export { WhyChooseSection } from "./WhyChooseSection";
+export { DentistsSection } from "./DentistsSection";
+export { JourneySection } from "./JourneySection";
+export { GallerySection } from "./GallerySection";
+export { TestimonialsSection } from "./TestimonialsSection";
+export { ClinicExperienceSection } from "./ClinicExperienceSection";
+export { InsuranceSection } from "./InsuranceSection";
+export { FAQSection } from "./FAQSection";
+export { BookingCTASection } from "./BookingCTASection";
+export { MarketingFooter } from "./MarketingFooter";
