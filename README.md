@@ -32,6 +32,7 @@ Copy env and set your Postgres URL:
 
 ```bash
 cd server
+npm install
 cp .env.example .env
 # Edit DATABASE_URL in .env
 ```
@@ -59,6 +60,7 @@ API: http://localhost:4000/api/health
 
 ```bash
 cd client
+npm install
 cp .env.example .env
 npm run dev
 ```
