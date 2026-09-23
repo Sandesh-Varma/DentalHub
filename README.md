@@ -1,6 +1,8 @@
-# DentFlow
+# DentalHub / DentFlow
 
-AI-ready dental clinic appointment and patient management system (MVP v1).
+A full-stack dental clinic appointment and patient management prototype (MVP v1).
+
+Patients can book appointments, while doctors and receptionists manage availability and appointment workflows through role-specific dashboards. The current implementation focuses on clinic operations; it does not include a validated AI diagnosis system.
 
 ## Stack
 
@@ -24,7 +26,7 @@ AI-ready dental clinic appointment and patient management system (MVP v1).
 
 ## Quick start
 
-### 1. Database
+### 1. Database and dependencies
 
 Copy env and set your Postgres URL:
 
