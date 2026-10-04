@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
   useCallback,
@@ -28,6 +29,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(() => getAuthToken());
   const [loading, setLoading] = useState(true);
@@ -56,6 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     const { data } = await api.post("/auth/login", { email, password });
+    await queryClient.cancelQueries();
+    queryClient.clear();
     setAuthToken(data.token);
     setToken(data.token);
     setUser(data.user);
@@ -64,6 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithGoogle = async (credential: string, portal: "patient" | "clinic") => {
     const { data } = await api.post("/auth/google", { credential, portal });
+    await queryClient.cancelQueries();
+    queryClient.clear();
     setAuthToken(data.token);
     setToken(data.token);
     setUser(data.user);
@@ -77,12 +83,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string;
   }) => {
     const { data } = await api.post("/auth/register", payload);
+    await queryClient.cancelQueries();
+    queryClient.clear();
     setAuthToken(data.token);
     setToken(data.token);
     setUser(data.user);
   };
 
   const logout = () => {
+    void queryClient.cancelQueries();
+    queryClient.clear();
     setAuthToken(null);
     setToken(null);
     setUser(null);

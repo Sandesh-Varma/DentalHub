@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { QueryError } from "@/components/QueryError";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addMonths,
@@ -70,7 +71,7 @@ export function AvailabilityPage() {
     slotDuration: 30 as 15 | 30 | 60,
   });
 
-  const { data: me } = useQuery({
+  const { data: me, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useQuery({
     queryKey: ["auth-me"],
     queryFn: async () => (await api.get("/auth/me")).data,
   });
@@ -78,7 +79,7 @@ export function AvailabilityPage() {
   const doctorId = me?.user?.doctor?.id as string | undefined;
   const monthKey = format(month, "yyyy-MM");
 
-  const { data: calendar } = useQuery({
+  const { data: calendar, isLoading: calendarLoading, isError: calendarError, refetch: refetchCalendar } = useQuery({
     queryKey: ["calendar", doctorId, monthKey],
     queryFn: async () =>
       (await api.get(`/schedules/doctor/${doctorId}/calendar`, { params: { month: monthKey } }))
@@ -201,6 +202,12 @@ export function AvailabilityPage() {
     enabled: !!doctorId && !!selectedKey,
   });
 
+  if (profileError || calendarError) {
+    return <QueryError retry={() => { void refetchProfile(); void refetchCalendar(); }} />;
+  }
+  if (profileLoading || calendarLoading) {
+    return <p role="status" className="text-slate-600">Loading your availability…</p>;
+  }
   if (!doctorId) {
     return <p className="text-slate-600">Doctor profile not linked to your account.</p>;
   }

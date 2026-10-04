@@ -1,3 +1,4 @@
+import { QueryError } from "@/components/QueryError";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
@@ -10,10 +11,12 @@ import { StatusBadge } from "@/components/ui/badge";
 
 export function ClinicDashboardPage() {
   const { user } = useAuth();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["dashboard"],
     queryFn: async () => (await api.get("/dashboard")).data,
   });
+
+  if (isError) return <QueryError retry={() => { void refetch(); }} />;
 
   if (isLoading) {
     return (

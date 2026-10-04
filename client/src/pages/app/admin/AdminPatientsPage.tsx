@@ -1,3 +1,4 @@
+import { QueryError } from "@/components/QueryError";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, User, X, Calendar, Phone, Mail, FileText, Trash2, ChevronRight, Info } from "lucide-react";
@@ -14,7 +15,7 @@ export function AdminPatientsPage() {
   const [search, setSearch] = useState("");
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
-  const { data: patients, isLoading } = useQuery({
+  const { data: patients, isLoading, isError, refetch } = useQuery({
     queryKey: ["patients"],
     queryFn: async () => (await api.get("/patients")).data,
   });
@@ -48,6 +49,8 @@ export function AdminPatientsPage() {
       return name.includes(q) || email.includes(q) || phone.includes(q);
     });
   }, [patients, search]);
+
+  if (isError) return <QueryError retry={() => { void refetch(); }} />;
 
   return (
     <div className="relative space-y-6 pb-20">

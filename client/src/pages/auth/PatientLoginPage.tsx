@@ -1,3 +1,4 @@
+import { loginErrorMessage } from "@/lib/loginError";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -39,8 +40,8 @@ export function PatientLoginPage() {
       }
       toast.success("Signed in");
       navigate(homeForRole(user.role), { replace: true });
-    } catch {
-      toast.error("Invalid email or password");
+    } catch (error) {
+      toast.error(loginErrorMessage(error));
     } finally {
       setLoading(false);
     }

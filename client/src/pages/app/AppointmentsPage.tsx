@@ -1,3 +1,4 @@
+import { QueryError } from "@/components/QueryError";
 import { useState, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -27,7 +28,7 @@ export function AppointmentsPage() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("ALL");
 
-  const { data: appointments, isLoading } = useQuery({
+  const { data: appointments, isLoading, isError, refetch } = useQuery({
     queryKey: ["appointments"],
     queryFn: async () => (await api.get("/appointments")).data,
   });
@@ -77,6 +78,8 @@ export function AppointmentsPage() {
       return matchesSearch && matchesTab;
     });
   }, [appointments, search, activeTab]);
+
+  if (isError) return <QueryError retry={() => { void refetch(); }} />;
 
   if (isLoading) {
     return (

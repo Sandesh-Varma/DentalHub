@@ -1,3 +1,4 @@
+import { loginErrorMessage } from "@/lib/loginError";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -39,8 +40,8 @@ export function ClinicLoginPage() {
       }
       toast.success("Welcome back");
       navigate(homeForRole(user.role), { replace: true });
-    } catch {
-      toast.error("Invalid email or password");
+    } catch (error) {
+      toast.error(loginErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -57,18 +58,18 @@ export function ClinicLoginPage() {
         <p className="mt-1 text-sm text-muted">Doctor and receptionist access.</p>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
           <div>
-            <Label>Work email</Label>
-            <Input type="email" {...register("email")} />
+            <Label htmlFor="clinic-email">Work email</Label>
+            <Input id="clinic-email" autoComplete="username" type="email" {...register("email")} />
             {errors.email && <p className="mt-1 text-xs text-danger">{errors.email.message}</p>}
           </div>
           <div>
             <div className="flex items-center justify-between">
-              <Label>Password</Label>
+              <Label htmlFor="clinic-password">Password</Label>
               <Link to="/clinic/forgot-password" className="text-xs font-medium text-primary">
                 Forgot password?
               </Link>
             </div>
-            <Input type="password" {...register("password")} />
+            <Input id="clinic-password" autoComplete="current-password" type="password" {...register("password")} />
             {errors.password && (
               <p className="mt-1 text-xs text-danger">{errors.password.message}</p>
             )}

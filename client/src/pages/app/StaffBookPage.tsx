@@ -1,3 +1,4 @@
+import { QueryError } from "@/components/QueryError";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -31,17 +32,17 @@ export function StaffBookPage() {
   const [date, setDate] = useState("");
   const [slot, setSlot] = useState("");
 
-  const { data: patients, isLoading: patientsLoading } = useQuery({
+  const { data: patients, isLoading: patientsLoading, isError: patientsError, refetch: refetchPatients } = useQuery({
     queryKey: ["patients"],
     queryFn: async () => (await api.get("/patients")).data,
   });
 
-  const { data: doctors, isLoading: doctorsLoading } = useQuery({
+  const { data: doctors, isLoading: doctorsLoading, isError: doctorsError, refetch: refetchDoctors } = useQuery({
     queryKey: ["doctors"],
     queryFn: async () => (await api.get("/doctors")).data,
   });
 
-  const { data: slotsData, isLoading: slotsLoading } = useQuery({
+  const { data: slotsData, isLoading: slotsLoading, isError: slotsError, refetch: refetchSlots } = useQuery({
     queryKey: ["slots", doctorId, date],
     queryFn: async () =>
       (await api.get<SlotsResponse>(`/schedules/doctor/${doctorId}/slots`, { params: { date } }))
@@ -72,6 +73,8 @@ export function StaffBookPage() {
   const noPatients = !patientsLoading && (!patients || patients.length === 0);
   const noDoctors = !doctorsLoading && (!doctors || doctors.length === 0);
 
+  if (patientsError || doctorsError) return <QueryError retry={() => { void refetchPatients(); void refetchDoctors(); }} />;
+
   return (
     <PageTransition>
       <div className="mx-auto max-w-2xl space-y-6 pb-20">
@@ -90,7 +93,7 @@ export function StaffBookPage() {
         {noDoctors && (
           <div className="rounded-lg bg-amber-50 p-4 border border-amber-100 flex items-start gap-2.5">
             <p className="text-xs text-amber-800 leading-relaxed font-semibold">
-              No doctors on file. Add a doctor profile or run the database seed.
+              No doctors on file. Ask the clinic owner to add a doctor profile.
             </p>
           </div>
         )}
@@ -152,6 +155,8 @@ export function StaffBookPage() {
               <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Available Time Slots</Label>
               {slotsLoading ? (
                 <p className="mt-3 text-xs text-muted animate-pulse">Loading available hours slots...</p>
+              ) : slotsError ? (
+                <QueryError retry={() => { void refetchSlots(); }} />
               ) : availableSlots.length === 0 ? (
                 <p className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-100 p-3 rounded-lg">
                   No open slots on this day. Ask the doctor to set weekly availability hours.
@@ -183,6 +188,8 @@ export function StaffBookPage() {
               !doctorId ||
               !date ||
               !slot ||
+              slotsLoading ||
+              slotsError ||
               book.isPending ||
               noPatients ||
               noDoctors
